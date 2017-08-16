@@ -16,7 +16,8 @@ module.exports = (db) => {
             company: company,
             location: location,
             description: description,
-            salary: salary
+            salary: salary,
+            date: Data.now()
         }
         collection.insert(insertObj, function (err) {
             if (err) return callback(false);;
