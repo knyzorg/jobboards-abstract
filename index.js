@@ -27,7 +27,7 @@ module.exports = (db) => {
     }
 
     function removeJob(refID) {
-        db.test_users.remove( {"_id": ObjectId(refID)});
+        db.test_users.remove({ "_id": ObjectId(refID) });
     }
 
     function getJobs(callback) {
@@ -66,6 +66,38 @@ module.exports = (db) => {
             })
         })
 
+        var o2x = require('object-to-xml');
+        cb(o2x(document));
+    }
+
+    function jobinventoryXML(cb) {
+        let document = { '?xml version=\"1.0\" encoding=\"iso-8859-1\"?': null, listing: { ctime: 0, entry: [] } }
+        getJobs((jobs) => {
+            jobs.forEach((job) => {
+                if (job.date > document.ctime) {
+                    document.ctime = job.date;
+                }
+                document.listing.entry.push({
+                    id: job._id.substr(0, 20),
+                    title: job.title,
+                    location: {
+                        country: job.country,
+                        state: job.state,
+                        city: job.city,
+                        postalcode: job.zip
+
+                    },
+                    description: job.description,
+                    date: moment(job.date).format("DD/MM/YYYY"),
+                    url: "https://placetoapply.com/apply/" + job._id.toString(),
+                    company: job.company
+
+                }
+
+                )
+            })
+        })
+        document.listing.ctime = moment(document.listing.ctime).toISOString()
         var o2x = require('object-to-xml');
         cb(o2x(document));
     }
